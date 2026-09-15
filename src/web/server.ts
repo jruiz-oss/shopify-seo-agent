@@ -11,7 +11,10 @@ export function startServer() {
   const app = express();
   app.use(express.urlencoded({ extended: false }));
 
-  // basic auth
+  // health check is public so Railway can probe it
+  app.get("/health", (_req, res) => res.json({ ok: true, running }));
+
+  // basic auth for everything else
   app.use((req, res, next) => {
     const h = req.headers.authorization ?? "";
     const [, b64] = h.split(" ");
@@ -19,8 +22,6 @@ export function startServer() {
     if (u === config.dashboard.user && p === config.dashboard.password) return next();
     res.set("WWW-Authenticate", 'Basic realm="seo-agent"').status(401).send("auth required");
   });
-
-  app.get("/health", (_req, res) => res.json({ ok: true, running }));
 
   // ---- inbox: pending proposals ----
   app.get("/", async (req, res) => {
