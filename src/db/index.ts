@@ -7,7 +7,8 @@ import { config } from "../config.js";
 const { Pool } = pg;
 export const pool = new Pool({
   connectionString: config.databaseUrl,
-  ssl: config.databaseUrl.includes("railway") || config.databaseUrl.includes("sslmode=require")
+  // Railway private networking (postgres.railway.internal) has no SSL. Opt in with sslmode=require or PGSSL=true.
+  ssl: config.databaseUrl.includes("sslmode=require") || process.env.PGSSL === "true"
     ? { rejectUnauthorized: false }
     : undefined,
 });
